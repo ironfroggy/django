@@ -37,4 +37,5 @@ class ModelTest(TestCase):
     def test_17143_5(self):
         (a,) = A.objects.select_related('b')
         self.assertEqual(a.id, self.b.id)
+        self.assertEqual(a.b.foo, 'Y')
         self.assertEqual(init_effect, ['Y'] * 3)
