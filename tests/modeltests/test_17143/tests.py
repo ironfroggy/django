@@ -22,15 +22,19 @@ class ModelTest(TestCase):
 
     def test_17143_2(self):
         a = A.objects.get()
-        self.assertEqual(init_effect, ['Y'])
+        self.assertEqual(init_effect, ['Y'] * 2)
 
     def test_17143_3(self):
+        b = B.objects.get()
+        self.assertEqual(init_effect, ['Y'] * 2)
+
+    def test_17143_4(self):
         a = A.objects.get()
         b = a.b
         self.assertEqual(b.foo, a.foo)
-        self.assertEqual(init_effect, ['Y'])
+        self.assertEqual(init_effect, ['Y'] * 3)
 
-    def test_17143_4(self):
+    def test_17143_5(self):
         (a,) = A.objects.select_related('b')
         self.assertEqual(a.id, self.b.id)
-        self.assertEqual(init_effect, ['Y'])
+        self.assertEqual(init_effect, ['Y'] * 3)
