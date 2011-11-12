@@ -174,10 +174,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         cursor.tzinfo_factory = None
         if force_db_set:
             if set_tz:
-                cursor.execute("SET TIME ZONE %s", [settings_dict['TIME_ZONE']])
+                self._set_tz(cursor, settings_dict['TIME_ZONE'])
             self._get_pg_version()
             self.force_db_set = False
         return CursorWrapper(cursor)
+
+    def _set_tz(self, cursor, tz):
+        cursor.execute("SET TIME ZONE %s", [tz])
 
     def _enter_transaction_management(self, managed):
         """

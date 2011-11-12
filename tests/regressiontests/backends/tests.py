@@ -308,6 +308,33 @@ class BackendTestCase(TestCase):
         self.assertTrue(hasattr(connection.ops, 'connection'))
         self.assertEqual(connection, connection.ops.connection)
 
+    @unittest.skipUnless(connection.vendor == 'postgresql',
+                         "SET TIME ZIME needs executed again if TIME_ZONE changes")
+    def test_cursor_force_db_set(self):
+        _set_tz = connection._set_tz
+        def mock_set_tz(*args, **kwargs):
+            mock_set_tz.called = (args, kwargs)
+        mock_set_tz.called = False
+        connection._set_tz = mock_set_tz
+        try:
+            connection.cursor()
+            self.assert_(mock_set_tz.called)
+            self.assertEqual(settings.TIME_ZONE, mock_set_tz.called[0][1])
+            mock_set_tz.called = False
+
+            connection.cursor()
+            self.assertFalse(mock_set_tz.called)
+            mock_set_tz.called = False
+
+            connection.force_db_set = True
+            connection.cursor()
+            self.assert_(mock_set_tz.called)
+            self.assertEqual(settings.TIME_ZONE, mock_set_tz.called[0][1])
+            mock_set_tz.called = False
+
+        finally:
+            connection._set_tz = _set_tz
+
 
 # We don't make these tests conditional because that means we would need to
 # check and differentiate between:
