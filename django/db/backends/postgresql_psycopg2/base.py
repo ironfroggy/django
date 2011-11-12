@@ -109,6 +109,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation(self)
         self._pg_version = None
+        self.force_db_set = True
 
     def check_constraints(self, table_names=None):
         """
@@ -143,11 +144,10 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     pg_version = property(_get_pg_version)
 
     def _cursor(self):
-        new_connection = False
+        force_db_set = self.force_db_set or self.connection is None
         set_tz = False
         settings_dict = self.settings_dict
-        if self.connection is None:
-            new_connection = True
+        if force_db_set:
             set_tz = settings_dict.get('TIME_ZONE')
             if settings_dict['NAME'] == '':
                 from django.core.exceptions import ImproperlyConfigured
@@ -172,10 +172,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             connection_created.send(sender=self.__class__, connection=self)
         cursor = self.connection.cursor()
         cursor.tzinfo_factory = None
-        if new_connection:
+        if force_db_set:
             if set_tz:
                 cursor.execute("SET TIME ZONE %s", [settings_dict['TIME_ZONE']])
             self._get_pg_version()
+            self.force_db_set = False
         return CursorWrapper(cursor)
 
     def _enter_transaction_management(self, managed):
