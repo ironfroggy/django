@@ -456,16 +456,17 @@ Then, add the following required settings to your Django settings file:
   the site, or some other string that is unique to this Django instance, to
   prevent key collisions. Use an empty string if you don't care.
 
-The cache middleware caches every page that doesn't have GET or POST
-parameters. Optionally, if the :setting:`CACHE_MIDDLEWARE_ANONYMOUS_ONLY`
-setting is ``True``, only anonymous requests (i.e., not those made by a
-logged-in user) will be cached. This is a simple and effective way of disabling
-caching for any user-specific pages (including Django's admin interface). Note
-that if you use :setting:`CACHE_MIDDLEWARE_ANONYMOUS_ONLY`, you should make
-sure you've activated ``AuthenticationMiddleware``. The cache middleware
-expects that a HEAD request is answered with the same response headers as
-the corresponding GET request; in which case it can return a cached GET
-response for HEAD request.
+The cache middleware caches every page requested by the HTTP GET or HEAD
+methods and considers differences in URL parameters to constitute unique
+pages to be cached separately. Optionally, if the
+:setting:`CACHE_MIDDLEWARE_ANONYMOUS_ONLY` setting is ``True``, only anonymous
+requests (i.e., not those made by a logged-in user) will be cached. This is a
+simple and effective way of disabling caching for any user-specific pages
+(including Django's admin interface). Note that if you use
+:setting:`CACHE_MIDDLEWARE_ANONYMOUS_ONLY`, you should make sure you've
+activated ``AuthenticationMiddleware``. The cache middleware expects that a
+HEAD request is answered with the same response headers as the corresponding
+GET request; in which case it can return a cached GET response for HEAD request.
 
 Additionally, the cache middleware automatically sets a few headers in each
 :class:`~django.http.HttpResponse`:
